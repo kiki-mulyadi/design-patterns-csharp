@@ -10,14 +10,14 @@
 // оперативную память. Легковес экономит память, разделяя общее состояние
 // объектов между собой, вместо хранения одинаковых данных в каждом объекте.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 // EN: Use Json.NET library, you can download it from NuGet Package Manager
 //
 // RU: Используем библиотеку Json.NET, загрузить можно через NuGet Package
 // Manager
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
 {
@@ -62,7 +62,7 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
 
         public FlyweightFactory(params Car[] args)
         {
-            foreach (var elem in args)
+            foreach (Car elem in args)
             {
                 flyweights.Add(new Tuple<Flyweight, string>(new Flyweight(elem), this.getKey(elem)));
             }
@@ -99,7 +99,8 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
         {
             string key = this.getKey(sharedState);
 
-            if (flyweights.Where(t => t.Item2 == key).Count() == 0)
+            bool isKeyInFlyweights = flyweights.Where(t => t.Item2 == key).Count() == 0;
+            if (isKeyInFlyweights)
             {
                 Console.WriteLine("FlyweightFactory: Can't find a flyweight, creating new one.");
                 this.flyweights.Add(new Tuple<Flyweight, string>(new Flyweight(sharedState), key));
@@ -108,12 +109,14 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
             {
                 Console.WriteLine("FlyweightFactory: Reusing existing flyweight.");
             }
-            return this.flyweights.Where(t => t.Item2 == key).FirstOrDefault().Item1;
+
+            Flyweight result = this.flyweights.Where(t => t.Item2 == key).FirstOrDefault().Item1;
+            return result;
         }
 
         public void listFlyweights()
         {
-            var count = flyweights.Count;
+            int count = flyweights.Count;
             Console.WriteLine($"\nFlyweightFactory: I have {count} flyweights:");
             foreach (var flyweight in flyweights)
             {
@@ -135,16 +138,16 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
         public string Color { get; set; }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: The client code usually creates a bunch of pre-populated
             // flyweights in the initialization stage of the application.
             //
             // RU: Клиентский код обычно создает кучу предварительно заполненных
             // легковесов на этапе инициализации приложения.
-            var factory = new FlyweightFactory(
+            FlyweightFactory factory = new FlyweightFactory(
                 new Car { Company = "Chevrolet", Model = "Camaro2018", Color = "pink" },
                 new Car { Company = "Mercedes Benz", Model = "C300", Color = "black" },
                 new Car { Company = "Mercedes Benz", Model = "C500", Color = "red" },
@@ -153,7 +156,8 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
             );
             factory.listFlyweights();
 
-            addCarToPoliceDatabase(factory, new Car {
+            addCarToPoliceDatabase(factory, new Car
+            {
                 Number = "CL234IR",
                 Owner = "James Doe",
                 Company = "BMW",
@@ -161,7 +165,8 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
                 Color = "red"
             });
 
-            addCarToPoliceDatabase(factory, new Car {
+            addCarToPoliceDatabase(factory, new Car
+            {
                 Number = "CL234IR",
                 Owner = "James Doe",
                 Company = "BMW",
@@ -176,7 +181,8 @@ namespace RefactoringGuru.DesignPatterns.Flyweight.Conceptual
         {
             Console.WriteLine("\nClient: Adding a car to database.");
 
-            var flyweight = factory.GetFlyweight(new Car {
+            Flyweight flyweight = factory.GetFlyweight(new Car
+            {
                 Color = car.Color,
                 Model = car.Model,
                 Company = car.Company
