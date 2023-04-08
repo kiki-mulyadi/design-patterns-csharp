@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
 {
-    abstract class Iterator : IEnumerator
+    internal abstract class Iterator : IEnumerator
     {
         object IEnumerator.Current => Current();
 
@@ -22,24 +22,24 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
         //
         // RU: Возвращает ключ текущего элемента
         public abstract int Key();
-		
+
         // EN: Returns the current element
         //
         // RU: Возвращает текущий элемент.
         public abstract object Current();
-		
+
         // EN: Move forward to next element
         //
         // RU: Переходит к следующему элементу.
         public abstract bool MoveNext();
-		
+
         // EN: Rewinds the Iterator to the first element
         //
         // RU: Перематывает Итератор к первому элементу.
         public abstract void Reset();
     }
 
-    abstract class IteratorAggregate : IEnumerable
+    internal abstract class IteratorAggregate : IEnumerable
     {
         // EN: Returns an Iterator or another IteratorAggregate for the
         // implementing object.
@@ -54,10 +54,10 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
     //
     // RU: Конкретные Итераторы реализуют различные алгоритмы обхода. Эти классы
     // постоянно хранят текущее положение обхода.
-    class AlphabeticalOrderIterator : Iterator
+    internal class AlphabeticalOrderIterator : Iterator
     {
         private WordsCollection _collection;
-		
+
         // EN: Stores the current traversal position. An iterator may have a lot
         // of other fields for storing iteration state, especially when it is
         // supposed to work with a particular kind of collection.
@@ -66,7 +66,7 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
         // других полей для хранения состояния итерации, особенно когда он
         // должен работать с определённым типом коллекции.
         private int _position = -1;
-		
+
         private bool _reverse = false;
 
         public AlphabeticalOrderIterator(WordsCollection collection, bool reverse = false)
@@ -79,7 +79,7 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
                 this._position = collection.getItems().Count;
             }
         }
-		
+
         public override object Current()
         {
             return this._collection.getItems()[_position];
@@ -89,12 +89,26 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
         {
             return this._position;
         }
-		
+
         public override bool MoveNext()
         {
-            int updatedPosition = this._position + (this._reverse ? -1 : 1);
+            bool isReverse = this._reverse;
+            int positionDelta;
 
-            if (updatedPosition >= 0 && updatedPosition < this._collection.getItems().Count)
+            if (isReverse)
+            {
+                positionDelta = -1;
+            }
+            else
+            {
+                positionDelta = 1;
+            }
+            int updatedPosition = this._position + positionDelta;
+
+            int numElements = this._collection.getItems().Count;
+            bool isWithinRange = updatedPosition >= 0 && updatedPosition < numElements;
+
+            if (isWithinRange)
             {
                 this._position = updatedPosition;
                 return true;
@@ -104,7 +118,7 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
                 return false;
             }
         }
-		
+
         public override void Reset()
         {
             this._position = this._reverse ? this._collection.getItems().Count - 1 : 0;
@@ -116,36 +130,36 @@ namespace RefactoringGuru.DesignPatterns.Iterator.Conceptual
     //
     // RU: Конкретные Коллекции предоставляют один или несколько методов для
     // получения новых экземпляров итератора, совместимых с классом коллекции.
-    class WordsCollection : IteratorAggregate
+    internal class WordsCollection : IteratorAggregate
     {
-        List<string> _collection = new List<string>();
-		
-        bool _direction = false;
-        
+        private List<string> _collection = new List<string>();
+
+        private bool _direction = false;
+
         public void ReverseDirection()
         {
             _direction = !_direction;
         }
-		
+
         public List<string> getItems()
         {
             return _collection;
         }
-		
+
         public void AddItem(string item)
         {
             this._collection.Add(item);
         }
-		
+
         public override IEnumerator GetEnumerator()
         {
             return new AlphabeticalOrderIterator(this, _direction);
         }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: The client code may or may not know about the Concrete
             // Iterator or Collection classes, depending on the level of
