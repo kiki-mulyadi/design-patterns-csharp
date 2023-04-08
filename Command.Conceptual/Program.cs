@@ -3,7 +3,7 @@
 // Intent: Turns a request into a stand-alone object that contains all
 // information about the request. This transformation lets you parameterize
 // methods with different requests, delay or queue a request's execution, and
-// support undoable operations.
+// support undo-able operations.
 //
 // RU: Паттерн Команда
 //
@@ -26,7 +26,7 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
     // EN: Some commands can implement simple operations on their own.
     //
     // RU: Некоторые команды способны выполнять простые операции самостоятельно.
-    class SimpleCommand : ICommand
+    internal class SimpleCommand : ICommand
     {
         private string _payload = string.Empty;
 
@@ -46,7 +46,7 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
     //
     // RU: Но есть и команды, которые делегируют более сложные операции другим
     // объектам, называемым «получателями».
-    class ComplexCommand : ICommand
+    internal class ComplexCommand : ICommand
     {
         private Receiver _receiver;
 
@@ -88,7 +88,7 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
     // RU: Классы Получателей содержат некую важную бизнес-логику. Они умеют
     // выполнять все виды операций, связанных с выполнением запроса. Фактически,
     // любой класс может выступать Получателем.
-    class Receiver
+    internal class Receiver
     {
         public void DoSomething(string a)
         {
@@ -106,7 +106,7 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
     //
     // RU: Отправитель связан с одной или несколькими командами. Он отправляет
     // запрос команде.
-    class Invoker
+    internal class Invoker
     {
         private ICommand _onStart;
 
@@ -135,24 +135,26 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
         public void DoSomethingImportant()
         {
             Console.WriteLine("Invoker: Does anybody want something done before I begin?");
-            if (this._onStart is ICommand)
+            bool isOnStartICommand = this._onStart is ICommand;
+            if (isOnStartICommand)
             {
                 this._onStart.Execute();
             }
-            
+
             Console.WriteLine("Invoker: ...doing something really important...");
-            
+
             Console.WriteLine("Invoker: Does anybody want something done after I finish?");
-            if (this._onFinish is ICommand)
+            bool isOnFinishICommand = this._onFinish is ICommand;
+            if (isOnFinishICommand)
             {
                 this._onFinish.Execute();
             }
         }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: The client code can parameterize an invoker with any
             // commands.
@@ -160,9 +162,16 @@ namespace RefactoringGuru.DesignPatterns.Command.Conceptual
             // RU: Клиентский код может параметризовать отправителя любыми
             // командами.
             Invoker invoker = new Invoker();
-            invoker.SetOnStart(new SimpleCommand("Say Hi!"));
+            string simpleCommandMsg = "Say Hi!";
+            SimpleCommand simpleCommand = new SimpleCommand(simpleCommandMsg);
+
+            invoker.SetOnStart(simpleCommand);
+
+            string complexCommandMsg1 = "Send email";
+            string complexCommandMsg2 = "Save report";
             Receiver receiver = new Receiver();
-            invoker.SetOnFinish(new ComplexCommand(receiver, "Send email", "Save report"));
+            ComplexCommand complexCommand = new ComplexCommand(receiver, complexCommandMsg1, complexCommandMsg2);
+            invoker.SetOnFinish(complexCommand);
 
             invoker.DoSomethingImportant();
         }
