@@ -23,7 +23,7 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
     public interface IHandler
     {
         IHandler SetNext(IHandler handler);
-		
+
         object Handle(object request);
     }
 
@@ -32,14 +32,14 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
     //
     // RU: Поведение цепочки по умолчанию может быть реализовано внутри базового
     // класса обработчика.
-    abstract class AbstractHandler : IHandler
+    internal abstract class AbstractHandler : IHandler
     {
         private IHandler _nextHandler;
 
         public IHandler SetNext(IHandler handler)
         {
             this._nextHandler = handler;
-            
+
             // EN: Returning a handler from here will let us link handlers in a
             // convenient way like this:
             // monkey.SetNext(squirrel).SetNext(dog);
@@ -49,12 +49,14 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
             // monkey.SetNext(squirrel).SetNext(dog);
             return handler;
         }
-		
+
         public virtual object Handle(object request)
         {
-            if (this._nextHandler != null)
+            bool canBeHandled = this._nextHandler != null;
+            if (canBeHandled)
             {
-                return this._nextHandler.Handle(request);
+                var nextHandleResult = this._nextHandler.Handle(request);
+                return nextHandleResult;
             }
             else
             {
@@ -63,52 +65,64 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
         }
     }
 
-    class MonkeyHandler : AbstractHandler
+    internal class MonkeyHandler : AbstractHandler
     {
         public override object Handle(object request)
         {
-            if ((request as string) == "Banana")
+            bool isRequestAllowed = request.ToString() == "Banana";
+            if (isRequestAllowed)
             {
                 return $"Monkey: I'll eat the {request.ToString()}.\n";
             }
             else
             {
-                return base.Handle(request);
+                string message = $"Monkey can't eat the {request.ToString()}";
+                Console.WriteLine(message);
+                var baseHandleResult = base.Handle(request);
+                return baseHandleResult;
             }
         }
     }
 
-    class SquirrelHandler : AbstractHandler
+    internal class SquirrelHandler : AbstractHandler
     {
         public override object Handle(object request)
         {
-            if (request.ToString() == "Nut")
+            bool isRequestAllowed = request.ToString() == "Nut";
+            if (isRequestAllowed)
             {
                 return $"Squirrel: I'll eat the {request.ToString()}.\n";
             }
             else
             {
-                return base.Handle(request);
+                string message = $"Squirrel can't eat the {request.ToString()}";
+                Console.WriteLine(message);
+                var baseHandleResult = base.Handle(request);
+                return baseHandleResult;
             }
         }
     }
 
-    class DogHandler : AbstractHandler
+    internal class DogHandler : AbstractHandler
     {
         public override object Handle(object request)
         {
-            if (request.ToString() == "MeatBall")
+            bool isRequestAllowed = request.ToString() == "MeatBall";
+            if (isRequestAllowed)
             {
                 return $"Dog: I'll eat the {request.ToString()}.\n";
             }
             else
             {
-                return base.Handle(request);
+                string message = $"Dog can't eat the {request.ToString()}";
+                Console.WriteLine(message);
+                var baseHandleResult = base.Handle(request);
+                return baseHandleResult;
             }
         }
     }
 
-    class Client
+    internal class Client
     {
         // EN: The client code is usually suited to work with a single handler.
         // In most cases, it is not even aware that the handler is part of a
@@ -119,7 +133,8 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
         // обработчик является частью цепочки.
         public static void ClientCode(AbstractHandler handler)
         {
-            foreach (var food in new List<string> { "Nut", "Banana", "Cup of coffee" })
+            List<string> foods = new List<string> { "Nut", "Banana", "Cup of coffee" };
+            foreach (string food in foods)
             {
                 Console.WriteLine($"Client: Who wants a {food}?");
 
@@ -137,9 +152,9 @@ namespace RefactoringGuru.DesignPatterns.ChainOfResponsibility.Conceptual
         }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: The other part of the client code constructs the actual
             // chain.
