@@ -19,7 +19,7 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
     // RU: Контекст определяет интерфейс, представляющий интерес для клиентов.
     // Он также хранит ссылку на экземпляр подкласса Состояния, который
     // отображает текущее состояние Контекста.
-    class Context
+    internal class Context
     {
         // EN: A reference to the current state of the Context.
         //
@@ -56,7 +56,7 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
             this._state.Handle2();
         }
     }
-    
+
     // EN: The base State class declares methods that all Concrete State should
     // implement and also provides a backreference to the Context object,
     // associated with the State. This backreference can be used by States to
@@ -66,7 +66,7 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
     // все Конкретные Состояния, а также предоставляет обратную ссылку на объект
     // Контекст, связанный с Состоянием. Эта обратная ссылка может
     // использоваться Состояниями для передачи Контекста другому Состоянию.
-    abstract class State
+    internal abstract class State
     {
         protected Context _context;
 
@@ -85,7 +85,7 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
     //
     // RU: Конкретные Состояния реализуют различные модели поведения, связанные
     // с состоянием Контекста.
-    class ConcreteStateA : State
+    internal class ConcreteStateA : State
     {
         public override void Handle1()
         {
@@ -100,7 +100,7 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
         }
     }
 
-    class ConcreteStateB : State
+    internal class ConcreteStateB : State
     {
         public override void Handle1()
         {
@@ -111,20 +111,58 @@ namespace RefactoringGuru.DesignPatterns.State.Conceptual
         {
             Console.WriteLine("ConcreteStateB handles request2.");
             Console.WriteLine("ConcreteStateB wants to change the state of the context.");
+            this._context.TransitionTo(new ConcreteStateC());
+        }
+    }
+
+    internal class ConcreteStateC : State
+    {
+        public override void Handle1()
+        {
+            Console.Write("ConcreteStateC handles request1.");
+        }
+
+        public override void Handle2()
+        {
+            Console.WriteLine("ConcreteStateC handles request2.");
+            Console.WriteLine("ConcreteStateC wants to change the state of the context.");
             this._context.TransitionTo(new ConcreteStateA());
         }
     }
 
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: The client code.
             //
             // RU: Клиентский код.
+
             var context = new Context(new ConcreteStateA());
+
+            AddBorderline();
+
             context.Request1();
+
+            AddBorderline();
             context.Request2();
+
+            AddBorderline();
+            context.Request2();
+
+            AddBorderline();
+            context.Request2();
+
+            AddBorderline();
+            context.Request1();
+        }
+
+        private static void AddBorderline()
+        {
+            Console.WriteLine();
+            string linePrint = new('=', 100);
+            Console.WriteLine(linePrint);
+            Console.WriteLine();
         }
     }
 }

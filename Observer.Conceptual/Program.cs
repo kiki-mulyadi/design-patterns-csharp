@@ -127,10 +127,10 @@ namespace RefactoringGuru.DesignPatterns.Observer.Conceptual
     //
     // RU: Конкретные Наблюдатели реагируют на обновления, выпущенные Издателем,
     // к которому они прикреплены.
-    class ConcreteObserverA : IObserver
+    internal class ConcreteObserverA : IObserver
     {
         public void Update(ISubject subject)
-        {            
+        {
             if ((subject as Subject).State < 3)
             {
                 Console.WriteLine("ConcreteObserverA: Reacted to the event.");
@@ -138,7 +138,7 @@ namespace RefactoringGuru.DesignPatterns.Observer.Conceptual
         }
     }
 
-    class ConcreteObserverB : IObserver
+    internal class ConcreteObserverB : IObserver
     {
         public void Update(ISubject subject)
         {
@@ -148,10 +148,22 @@ namespace RefactoringGuru.DesignPatterns.Observer.Conceptual
             }
         }
     }
-    
-    class Program
+
+    internal class ConcreteObsrverC : IObserver
     {
-        static void Main(string[] args)
+        public void Update(ISubject subject)
+        {
+            bool isTrue = (subject as Subject).State > 5;
+            if (isTrue)
+            {
+                Console.WriteLine("ConcreteObserverC: Reacted to the event.");
+            }
+        }
+    }
+
+    internal class Program
+    {
+        private static void Main(string[] args)
         {
             // EN: The client code.
             //
@@ -163,12 +175,20 @@ namespace RefactoringGuru.DesignPatterns.Observer.Conceptual
             var observerB = new ConcreteObserverB();
             subject.Attach(observerB);
 
+            var observerC = new ConcreteObsrverC();
+            subject.Attach(observerC);
+
             subject.SomeBusinessLogic();
             subject.SomeBusinessLogic();
 
             subject.Detach(observerB);
 
             subject.SomeBusinessLogic();
+            subject.SomeBusinessLogic();
+            subject.Detach(observerA);
+            subject.SomeBusinessLogic();
+            subject.SomeBusinessLogic();
+            Console.ReadKey();
         }
     }
 }

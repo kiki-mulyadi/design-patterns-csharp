@@ -23,7 +23,7 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
     // RU: Создатель содержит некоторое важное состояние, которое может со
     // временем меняться. Он также объявляет метод сохранения состояния внутри
     // снимка и метод восстановления состояния из него.
-    class Originator
+    internal class Originator
     {
         // EN: For the sake of simplicity, the originator's state is stored
         // inside a single variable.
@@ -113,7 +113,7 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
     //
     // RU: Конкретный снимок содержит инфраструктуру для хранения состояния
     // Создателя.
-    class ConcreteMemento : IMemento
+    internal class ConcreteMemento : IMemento
     {
         private string _state;
 
@@ -133,7 +133,7 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
         {
             return this._state;
         }
-        
+
         // EN: The rest of the methods are used by the Caretaker to display
         // metadata.
         //
@@ -158,7 +158,7 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
     // RU: Опекун не зависит от класса Конкретного Снимка. Таким образом, он не
     // имеет доступа к состоянию создателя, хранящемуся внутри снимка. Он
     // работает со всеми снимками через базовый интерфейс Снимка.
-    class Caretaker
+    internal class Caretaker
     {
         private List<IMemento> _mementos = new List<IMemento>();
 
@@ -172,12 +172,15 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
         public void Backup()
         {
             Console.WriteLine("\nCaretaker: Saving Originator's state...");
-            this._mementos.Add(this._originator.Save());
+
+            IMemento mementoToBackup = this._originator.Save();
+            this._mementos.Add(mementoToBackup);
         }
 
         public void Undo()
         {
-            if (this._mementos.Count == 0)
+            bool isMementoEmpty = this._mementos.Count == 0;
+            if (isMementoEmpty)
             {
                 return;
             }
@@ -201,16 +204,16 @@ namespace RefactoringGuru.DesignPatterns.Memento.Conceptual
         {
             Console.WriteLine("Caretaker: Here's the list of mementos:");
 
-            foreach (var memento in this._mementos)
+            foreach (IMemento memento in this._mementos)
             {
                 Console.WriteLine(memento.GetName());
             }
         }
     }
-    
-    class Program
+
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             // EN: Client code.
             //
